@@ -2,6 +2,8 @@
 title: "EDS 221: Day 7 Interactive"
 author: "Takeen Shamloo"
 format: html
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Day 7 Interactive
@@ -13,8 +15,32 @@ library(palmerpenguins)
 library(lubridate)
 ```
 
+### Refresher 1
+```{r}
+my_penguins <- penguins |>
+  filter(island %in% c("Biscoe", "Dream")) |>
+  select(-c("year", "sex")) |>
+  mutate(body_mass_kg = body_mass_g/1000) |>
+  rename(location = island)
+```
+
+### Refresher 2
+
+```{r}
+my_penguins_2 <- penguins |>
+  filter(species %in% "Adelie" & !is.na(flipper_length_mm)) |>
+  group_by(sex) |>
+  summarize(mean = mean(flipper_length_mm),
+            sd = sd(flipper_length_mm),
+            sample_size = n())
+```
+
+## Data Wrangling: Joins
+
 ```{r}
 
 ```
+
+
 
 
