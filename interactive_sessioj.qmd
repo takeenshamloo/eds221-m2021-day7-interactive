@@ -1,0 +1,20 @@
+---
+title: "EDS 221: Day 7 Interactive"
+author: "Takeen Shamloo"
+format: html
+---
+
+## Day 7 Interactive
+
+```{r}
+# Load packages ----
+library(tidyverse)
+library(palmerpenguins)
+library(lubridate)
+```
+
+```{r}
+
+```
+
+
