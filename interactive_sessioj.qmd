@@ -6,7 +6,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Day 7 Interactive
+## Day 7 Interactive ----
 
 ```{r}
 # Load packages ----
@@ -15,7 +15,7 @@ library(palmerpenguins)
 library(lubridate)
 ```
 
-### Refresher 1
+### Refresher 1 ----
 ```{r}
 my_penguins <- penguins |>
   filter(island %in% c("Biscoe", "Dream")) |>
@@ -24,7 +24,7 @@ my_penguins <- penguins |>
   rename(location = island)
 ```
 
-### Refresher 2
+### Refresher 2 ----
 
 ```{r}
 my_penguins_2 <- penguins |>
@@ -35,11 +35,251 @@ my_penguins_2 <- penguins |>
             sample_size = n())
 ```
 
-## Data Wrangling: Joins
+## Data Wrangling: Joins ----
+
+
+### Initializing Dataframes ----
+```{r}
+library(datapasta)
+
+animals <- tibble::tribble(
+  ~location,   ~species,  ~maturity,
+   "lagoon",   "bobcat",    "adult",
+    "bluff",   "coyote", "juvenile",
+    "creek",      "fox",    "adult",
+     "oaks", "squirrel", "juvenile",
+    "bluff",   "bobcat",    "adult")
+
+sites <- tibble::tribble(
+  ~location,      ~full_site_name, ~jurisdiction,
+    "beach",       "Goleta Beach",     "SB City",
+   "lagoon",        "UCSB Lagoon",        "UCSB",
+    "bluff",       "Ellwood Mesa",     "SB City",
+     "oaks", "Fremont Campground",        "USFS")
+```
+
+### Full Join ----
 
 ```{r}
+full_join_ex <- full_join(animals, sites)
+full_join_ex
+```
+
+### Left Join ----
+
+```{r}
+left_join_ex <- left_join(animals, sites)
+left_join_ex
+```
+
+### Right Join ----
+
+```{r}
+right_join_ex <- right_join(animals, sites)
+right_join_ex
+```
+
+### Inner Join ----
+
+```{r}
+inner_join_ex <- inner_join(animals, sites)
+inner_join_ex
+```
+
+## Filtering Joins ----
+
+### Semi Join ----
+```{r}
+semi_join_ex <- semi_join(animals, sites)
+semi_join_ex
+```
+
+### Anti Join ----
+
+```{r}
+anti_join_ex <- anti_join(animals, sites)
+anti_join_ex
+```
+
+## Easier dates and times with {lubridate} ----
+
+```{r}
+my_date <- "03-15-1998"
+lubridate::mdy(my_date)
+
+my_date <- "11/7/2003"
+lubridate::mdy(my_date)
+
+my_date <- "08-Jun-1974"
+lubridate::dmy(my_date)
+
+my_date <- "19610518"
+lubridate::ymd(my_date)
+```
+
+### What if it fails? ----
+
+```{r}
+lubridate::mdy("1942-08-30") # Nope
+
+lubridate::dmy("09/12/84") # Incorrect date output
+```
+
+### Time Zones ----
+
+```{r}
+time <- "2020-08-12 11:18"
+time <- ymd_hm(time)
+time # UTC by default
+
+class(time) # Class is POSIXct
+
+# Convert to PDT
+with_tz(time, "America/Los_Angeles")
+
+# Convert to AEST
+with_tz(time, "Australia/Sydney")
+
+# pull just the time
+my_time <- lubridate::ymd_hms(time)
+week(my_time)
+
+day(my_time)
+
+hour(my_time)
+
+minute(my_time)
+
+second(my_time)
+```
+
+### More time examples ----
+
+```{r}
+comp_time <- Sys.time() # returns system time
+
+with_tz(comp_time, "Europe/Belgrade")
+```
+
+### Pulling pieces ----
+
+```{r}
+teddy_bday <- lubridate::ymd("20170615")
+
+# Return the date 
+teddy_bday
+
+# What day of the week? 
+wday(teddy_bday, label = TRUE)
+
+# What week of the year? 
+week(teddy_bday)
+
+# Pull the year
+year(teddy_bday)
+
+# Month
+month(teddy_bday)
+```
+
+### Data pieces as new columns ----
+
+```{r}
+urchin_counts <- tribble(
+  ~date, ~species, ~size_mm,
+  "10/3/2020", "purple", 55,
+  "10/4/2020", "red", 48,
+  "11/17/2020", "red", 67
+)
+
+urchin_counts_ymd <- urchin_counts %>% 
+  mutate(date = lubridate::mdy(date)) %>% 
+  mutate(year = year(date),
+         month = month(date),
+         day = day(date))
+
+urchin_counts_ymd
+```
+
+### Duration of times ----
+
+```{r}
+day_1 <- lubridate::ymd("2020-01-06")
+day_2 <- lubridate::ymd("2020-05-18")
+day_3 <- lubridate::ymd("2020-05-19")
+
+# Create a time interval
+time_interval <- interval(day_1, day_2)
+
+# Check the length in weeks
+time_length(time_interval, "week")
+
+# Check the length in years
+time_length(time_interval, "year")
 
 ```
+
+## Wrangling strings with {stringr}
+
+```{r}
+my_string <- "Teddy loves eating salmon and socks."
+
+# Does the pattern "love" exist within the string?
+my_string %>% str_detect("love")
+
+# Does the pattern "pup" exist within the string?
+my_string %>% str_detect("pup")
+
+my_string <- c("burrito", "fish taco", "Taco salad")
+
+# Does the vector element contain the pattern "fish"?
+my_string %>% str_detect("fish")
+```
+
+### str_detect() to detect a string pattern
+
+```{r}
+head(starwars)
+
+skywalkers <- starwars %>% 
+  filter(str_detect(name, "Skywalker"))
+
+skywalkers
+```
+
+### str_replace() to replace a string pattern with something else
+
+```{r}
+firewalkers <- starwars %>% 
+  mutate(name = str_replace(name, pattern = "Sky", replacement = "Fire"))
+
+head(firewalkers)
+```
+
+### str_trim() or str_squish() to remove white space ----
+
+```{r}
+feedback <- c(" I ate     some   nachos", "Wednesday morning   ")
+
+# Removes leading, trailing & duplicate interior whitespaces
+str_squish(feedback)
+
+# Removes leading & trailing whitespaces
+str_trim(feedback)
+
+str_to_lower(feedback)
+
+str_to_upper(feedback)
+
+str_to_title(feedback)
+
+str_count(feedback, pattern = "nachos")
+```
+
+
+
+
+
 
 
 
